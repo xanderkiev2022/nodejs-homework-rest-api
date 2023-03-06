@@ -43,11 +43,7 @@ const addContact = async (name, email, phone) => {
     const contacts = JSON.parse(data);
     const newContact = { id: nanoid(), name, email, phone };
     const updatedContacts = [newContact, ...contacts];
-    await fs.writeFile(
-      contactsPath,
-      JSON.stringify(updatedContacts, null, 2),
-      "utf8"
-    );
+    await fs.writeFile(contactsPath, JSON.stringify(updatedContacts, null, 2), "utf8");
     return newContact;
   } catch (error) {
     console.log(error.message);
@@ -58,9 +54,7 @@ const updateContact = async (contactId, body) => {
   try {
     const data = await fs.readFile(contactsPath, "utf8");
     const contacts = JSON.parse(data);
-    const searchedContact = contacts.find(
-      (contact) => contact.id === contactId
-    );
+    const searchedContact = contacts.find((contact) => contact.id === contactId);
     searchedContact.name = body.name ?? searchedContact.name;
     searchedContact.email = body.email ?? searchedContact.email;
     searchedContact.phone = body.phone ?? searchedContact.phone;
