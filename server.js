@@ -4,9 +4,7 @@ const { connectMongo } = require("./src/db/connections");
 
 const satrt = async () => {
   try {
-    const test = await connectMongo();
-    const contacts = await test.find({}).toArray();
-    console.log("contacts1 :>> ", contacts);
+    await connectMongo();
 
     app.listen(process.env.PORT, (error) => {
       if (error) console.error(`Error at server lunch: ${error.message}`);
