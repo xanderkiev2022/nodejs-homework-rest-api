@@ -6,7 +6,7 @@ const satrt = async () => {
   try {
     await connectMongo();
 
-    app.listen(process.env.PORT, (error) => {
+    await app.listen(process.env.PORT, (error) => {
       if (error) console.error(`Error at server lunch: ${error.message}`);
       console.log(`Server running. Use our API on port: ${process.env.PORT}`);
     });

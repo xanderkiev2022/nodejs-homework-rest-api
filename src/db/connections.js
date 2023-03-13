@@ -1,14 +1,12 @@
-const MongoClient = require("mongodb").MongoClient;
+const mongoose = require("mongoose");
 
 const connectMongo = async () => {
-   const client = await MongoClient.connect(process.env.MONGO_URL, {
-     useNewUrlParser: true,
-     useUnifiedTopology: true,
-   });
-    console.log("Database connection successful");
-    const db = client.db();
-    const Contacts = db.collection("contacts");
-    return Contacts;
-}
+  const client = await mongoose.connect(process.env.MONGO_URL, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  });
+  console.log("Database connection successful");
+  return client;
+};
 
 module.exports = { connectMongo };
