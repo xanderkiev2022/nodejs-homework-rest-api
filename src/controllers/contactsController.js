@@ -1,69 +1,56 @@
-const Joi = require("joi");
-const { Contact } = require("../db/contactModel");
-
-const contactValidation = Joi.object({
-  name: Joi.string().required(),
-  email: Joi.string().email().required(),
-  phone: Joi.string().required(),
-  favorite: Joi.bool().required(),
-});
-
-const favoriteValidation = Joi.object({
-  favorite: Joi.bool().required().messages({ "any.required": "Missing field favorite" }),
-});
+const serviceContacts = require("../../src/services/contactsService");
+const mongoose = require("mongoose");
+const { NotFoundError } = require("../helpers/errors");
 
 const getAll = async (req, res, next) => {
-  const contacts = await Contact.find({});
+  const contacts = await serviceContacts.getContacts();
   res.status(200).json({ message: "Success ", data: { contacts } });
 };
 
 const getById = async (req, res, next) => {
   const { contactId } = req.params;
-  const contact = await Contact.findOne({ _id: contactId });
-  if (!contact) res.status(404).json({ message: "Not found" });
-  if (contact) res.status(200).json({ message: "Success ", data: { contact } });
-};
-
-const add = async (req, res, next) => {
-  try {
-    const data = await contactValidation.validateAsync(req.body);
-    const newContact = await Contact.create(data);
-    res.status(201).json({ message: "Contact added ", data: { newContact } });
-  } catch (err) {
-    res.status(400).json({ message: err.details[0].message });
+  if (!mongoose.Types.ObjectId.isValid(contactId)) throw new NotFoundError("Not found");
+  // { return res.status(404).json({ message: "Not found" }); }
+      
+  else {
+      const contact = await serviceContacts.getContactById(contactId);
+    res.status(200).json({ message: "Success ", data: { contact } });
   }
 };
 
+const add = async (req, res, next) => {
+  const data = req.body;
+  const newContact = await serviceContacts.addContact(data);
+  res.status(201).json({ message: "Contact added ", data: { newContact } });
+};
+
 const update = async (req, res, next) => {
-  try {
-    const { contactId } = req.params;
-    const data = await contactValidation.validateAsync(req.body);
-    const contactToEdit = await Contact.findByIdAndUpdate({ _id: contactId }, data, { new: true });
-    if (!contactToEdit) { res.status(404).json({ message: "Not found" }); }
-    else {res.status(200).json({ message: "Contact was updated", data: { contactToEdit } });}
-  } catch (err) {
-    res.status(400).json({ message: err.details[0].message });
+  const { contactId } = req.params;
+  if (!mongoose.Types.ObjectId.isValid(contactId)) {return res.status(404).json({ message: "Not found" });}
+  else {
+    const data = req.body;
+    const contactToEdit = await serviceContacts.updateContactById(contactId, data);
+    res.status(200).json({ message: "Contact was updated", data: { contactToEdit } });
   }
 };
 
 const updateStatus = async (req, res, next) => {
-  try {
-    const { contactId } = req.params;
-    const data = await favoriteValidation.validateAsync(req.body);
-    const contactToEdit = await Contact.findByIdAndUpdate({ _id: contactId }, data, { new: true });
-    if (!contactToEdit) {res.status(404).json({ message: "Not found" });}
-    else {res.status(200).json({ message: "Favorite status was updated", data: { contactToEdit } });}
-  } catch (err) {
-    res.status(400).json({ message: err.details[0].message });
+  const { contactId } = req.params;
+  if (!mongoose.Types.ObjectId.isValid(contactId)) {return res.status(404).json({ message: "Not found" });}
+  else {
+    const data = req.body;
+    const contactToEdit = await serviceContacts.updateStatusById(contactId, data);
+    res.status(200).json({ message: "Favorite status was updated", data: { contactToEdit } });
   }
 };
 
 const remove = async (req, res, next) => {
   const { contactId } = req.params;
-  const contactToDel = await Contact.findOne({ _id: contactId });
-  await Contact.findByIdAndRemove({ _id: contactId });
-  if (!contactToDel) res.status(404).json({ message: "Not found" });
-  if (contactToDel) res.status(200).json({ message: "Contact deleted " });
+  if (!mongoose.Types.ObjectId.isValid(contactId)) { return res.status(404).json({ message: "Not found" }); }
+  else {
+    await serviceContacts.removeContact(contactId);
+    res.status(200).json({ message: "Contact deleted " });
+  }
 };
 
 module.exports = { getAll, getById, add, update, updateStatus, remove, };
