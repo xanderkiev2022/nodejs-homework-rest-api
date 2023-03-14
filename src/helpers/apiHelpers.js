@@ -1,5 +1,3 @@
-// try catch wrapper
-
 const { NotFoundError, ValidationError } = require("./errors");
 
 const asyncWrapper = (controller) => {

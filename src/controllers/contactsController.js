@@ -9,11 +9,9 @@ const getAll = async (req, res, next) => {
 
 const getById = async (req, res, next) => {
   const { contactId } = req.params;
-  if (!mongoose.Types.ObjectId.isValid(contactId)) throw new NotFoundError("Not found");
-  // { return res.status(404).json({ message: "Not found" }); }
-      
+  if (!mongoose.Types.ObjectId.isValid(contactId)) throw new NotFoundError("Not found");      
   else {
-      const contact = await serviceContacts.getContactById(contactId);
+    const contact = await serviceContacts.getContactById(contactId);
     res.status(200).json({ message: "Success ", data: { contact } });
   }
 };
@@ -26,7 +24,7 @@ const add = async (req, res, next) => {
 
 const update = async (req, res, next) => {
   const { contactId } = req.params;
-  if (!mongoose.Types.ObjectId.isValid(contactId)) {return res.status(404).json({ message: "Not found" });}
+  if (!mongoose.Types.ObjectId.isValid(contactId)) throw new NotFoundError("Not found");   
   else {
     const data = req.body;
     const contactToEdit = await serviceContacts.updateContactById(contactId, data);
@@ -36,7 +34,7 @@ const update = async (req, res, next) => {
 
 const updateStatus = async (req, res, next) => {
   const { contactId } = req.params;
-  if (!mongoose.Types.ObjectId.isValid(contactId)) {return res.status(404).json({ message: "Not found" });}
+  if (!mongoose.Types.ObjectId.isValid(contactId)) throw new NotFoundError("Not found");   
   else {
     const data = req.body;
     const contactToEdit = await serviceContacts.updateStatusById(contactId, data);
@@ -46,7 +44,7 @@ const updateStatus = async (req, res, next) => {
 
 const remove = async (req, res, next) => {
   const { contactId } = req.params;
-  if (!mongoose.Types.ObjectId.isValid(contactId)) { return res.status(404).json({ message: "Not found" }); }
+  if (!mongoose.Types.ObjectId.isValid(contactId)) throw new NotFoundError("Not found");
   else {
     await serviceContacts.removeContact(contactId);
     res.status(200).json({ message: "Contact deleted " });
