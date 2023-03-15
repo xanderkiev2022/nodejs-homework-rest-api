@@ -1,57 +1,15 @@
 const express = require("express");
 const router = express.Router();
-const Joi = require("joi");
+const ctrlContact = require("../../src/controllers/contactsController");
+const { asyncWrapper } = require("../../src/helpers/apiHelpers");
+const { addContactValidation, updateFavoriteValidation, updateContactValidation } = require("../../src/middlewares/validationMiddleware");
 
-const contactValidation = Joi.object({
-  name: Joi.string().required(),
-  email: Joi.string().email().required(),
-  phone: Joi.string().required(),
-});
+router.get("/", asyncWrapper(ctrlContact.getAll));
+router.get("/:contactId", asyncWrapper(ctrlContact.getById));
+router.post("/", addContactValidation, asyncWrapper(ctrlContact.add));
+router.put("/:contactId",  updateContactValidation, asyncWrapper(ctrlContact.update));
+router.delete("/:contactId", asyncWrapper(ctrlContact.remove));
+router.patch("/:contactId/favorite", updateFavoriteValidation, asyncWrapper(ctrlContact.updateStatus)
+);
 
-const {
-  listContacts,
-  getContactById,
-  removeContact,
-  addContact,
-  updateContact,
-} = require("../../models/contacts");
-
-router.get("/", async (req, res, next) => {
-  const contacts = await listContacts();
-  res.status(200).json({ message: "Success ", data: { contacts } });
-});
-
-router.get("/:contactId", async (req, res, next) => {
-  const { contactId } = req.params;
-  const contact = await getContactById(contactId);
-  if (!contact) res.status(404).json({ message: "Not found" });
-  if (contact) res.status(200).json({ message: "Success ", data: { contact } });
-});
-
-router.post("/", async (req, res, next) => {
-  try {
-    const { name, email, phone } = await contactValidation.validateAsync(req.body);
-    const newContact = await addContact(name, email, phone);
-    res.status(201).json({ message: "Contact added ", data: { newContact } });} 
-  catch (err) {res.status(400).json({ message: err.details[0].message });}
-});
-
-router.put("/:contactId", async (req, res, next) => {
-  try {
-    const { contactId } = req.params;
-    await contactValidation.validateAsync(req.body);
-      const contactToEdit = await updateContact(contactId, req.body);
-      if (!contactToEdit) { res.status(404).json({ message: "Not found" }); }
-      else { res.status(200).json({ message: "Contact was updated", data: { contactToEdit } });}} 
-  catch (err) {res.status(400).json({ message: err.details[0].message });}
-});
-
-router.delete("/:contactId", async (req, res, next) => {
-  const { contactId } = req.params;
-  const contactToDel = await getContactById(contactId);
-  await removeContact(contactId);
-  if (!contactToDel) res.status(404).json({ message: "Not found" });
-  if (contactToDel) res.status(200).json({ message: "Contact deleted " });
-});
-
-module.exports = router;
+module.exports = router; 
