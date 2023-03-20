@@ -3,22 +3,25 @@ const mongoose = require("mongoose");
 const { NotFoundError } = require("../helpers/errors");
 
 const getAll = async (req, res, next) => {
-  const contacts = await serviceContacts.getContacts();
+  const {_id} = req.user;
+  const contacts = await serviceContacts.getContacts(_id);
   res.status(200).json({ message: "Success ", data: { contacts } });
 };
 
 const getById = async (req, res, next) => {
+  const { _id } = req.user;
   const { contactId } = req.params;
   if (!mongoose.Types.ObjectId.isValid(contactId)) throw new NotFoundError("Not found");      
   else {
-    const contact = await serviceContacts.getContactById(contactId);
+    const contact = await serviceContacts.getContactById(contactId, _id);
     res.status(200).json({ message: "Success ", data: { contact } });
   }
 };
 
 const add = async (req, res, next) => {
+  const { _id } = req.user;
   const data = req.body;
-  const newContact = await serviceContacts.addContact(data);
+  const newContact = await serviceContacts.addContact(data, _id);
   res.status(201).json({ message: "Contact added ", data: { newContact } });
 };
 
