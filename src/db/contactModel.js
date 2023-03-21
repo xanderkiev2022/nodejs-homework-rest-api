@@ -11,6 +11,3 @@ const contactsSchema = new mongoose.Schema({
 const Contact = mongoose.model("contact", contactsSchema);
 
 module.exports = { Contact };
-
-// Змініть схему контактів, щоб кожен користувач бачив тільки свої контакти. Для цього в схемі контактів додайте властивість
-    
