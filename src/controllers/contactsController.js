@@ -3,12 +3,15 @@ const mongoose = require("mongoose");
 const { NotFoundError } = require("../helpers/errors");
 
 const getAll = async (req, res, next) => {
-  const { _id } = req.user;
-  let { skip = 0, limit = 5 } = req.query;
+
+const { _id } = req.user;
+  let { page = 1, limit = 10, sort } = req.query;
   limit = limit > 10 ? 10 : parseInt(limit);
-  skip = parseInt(skip);
-  const contacts = await serviceContacts.getContacts(_id, { skip, limit });
-  res.status(200).json({ message: "Success ", data: { skip, limit, contacts } });
+  const startIndex = (page - 1) * limit;
+  const totalContacts = await serviceContacts.getContactsCount(_id);
+  const totalPages = Math.ceil(totalContacts / limit);
+  const contacts = await serviceContacts.getContacts(_id, {startIndex, limit, sort, });
+  res.status(200).json({ message: "Success", data: { page, totalContacts, totalPages, limit, sort, contacts } });
 };
 
 const getById = async (req, res, next) => {

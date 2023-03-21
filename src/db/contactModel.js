@@ -6,7 +6,8 @@ const contactsSchema = new mongoose.Schema({
   phone: { type: String },
   favorite: { type: Boolean, default: false },
   owner: { type: mongoose.SchemaTypes.ObjectId, ref: "user" },
-});
+},
+{ versionKey: false, timestamps: true });
 
 const Contact = mongoose.model("contact", contactsSchema);
 

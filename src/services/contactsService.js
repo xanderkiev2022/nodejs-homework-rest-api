@@ -1,10 +1,15 @@
 const { Contact } = require("../db/contactModel");
 
-const getContacts = async (userId, {skip, limit}) => {
+const getContactsCount = async (userId) => {
+  return await Contact.countDocuments({ owner: userId });
+};
+
+const getContacts = async (userId, { startIndex, limit, sort }) => {
   const contacts = await Contact.find({ owner: userId })
-    .select({ __v: 0 })
-    .skip(skip)
-    .limit(limit);
+    .select({ __v: 0, owner: 0 })
+    .skip(startIndex)
+    .limit(limit)
+    .sort(sort);
   return contacts;
 };
 const getContactById = async (contactId) => {
@@ -42,4 +47,5 @@ module.exports = {
   updateContactById,
   updateStatusById,
   removeContact,
+  getContactsCount,
 };
