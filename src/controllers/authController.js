@@ -18,8 +18,15 @@ const logout = async (req, res, next) => {
   res.status(204).json();
 };
 
+const current = async (req, res, next) => {
+  const { _id, email, subscription } = req.user;
+  await serviceAuth.current(_id);
+   res.status(200).json({ message: "OK", user: { email, subscription } });
+};
+
 module.exports = {
   registration,
   login,
   logout,
+  current,
 };

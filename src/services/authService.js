@@ -35,8 +35,16 @@ const logout = async (_id) => {
   await User.findByIdAndUpdate(_id, { token: null });
 };
 
+const current = async (_id) => {
+  const user = await User.findOne({ _id });
+  if (!user) {
+    throw new UnauthorizedError("Not authorized");
+  }
+};
+
 module.exports = {
   registration,
   login,
   logout,
+  current,
 };

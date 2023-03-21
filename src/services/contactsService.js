@@ -4,10 +4,10 @@ const getContactsCount = async (userId) => {
   return await Contact.countDocuments({ owner: userId });
 };
 
-const getContacts = async (userId, { startIndex, limit, sort }) => {
+const getContacts = async (userId, { skip, limit, sort }) => {
   const contacts = await Contact.find({ owner: userId })
     .select({ __v: 0, owner: 0 })
-    .skip(startIndex)
+    .skip(skip)
     .limit(limit)
     .sort(sort);
   return contacts;

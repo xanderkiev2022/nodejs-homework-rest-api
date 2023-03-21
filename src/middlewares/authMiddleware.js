@@ -15,9 +15,6 @@ const authMiddleware = async (req, res, next) => {
         const user = await User.findById(_id);
         if (!user || user.token !== token ) { next(new UnauthorizedError("Invalid token")); }
 
-        console.log("user.token :>> ", user.token);
-        console.log("token :>> ", token);
-
         req.token = token;
         req.user = user;
         next();
