@@ -1,14 +1,14 @@
-// class APIError extends Error {
-//   constructor(message) {
-//     super(message);
-//     this.status = 400;
-//   }
-// }
-
 class ValidationError extends Error {
   constructor(message) {
     super(message);
     this.status = 400;
+  }
+}
+
+class UnauthorizedError extends Error {
+  constructor(message) {
+    super(message);
+    this.status = 401;
   }
 }
 
@@ -19,13 +19,10 @@ class NotFoundError extends Error {
   }
 }
 
-class UnauthorizedError extends Error {
+class ConflictError extends Error {
   constructor(message) {
     super(message);
-    this.status = 401;
-    //     ResponseBody: {
-    //   "message": "Email or password is wrong"
-    // }
+    this.status = 409;
   }
 }
 
@@ -33,4 +30,5 @@ module.exports = {
   ValidationError,
   NotFoundError,
   UnauthorizedError,
+  ConflictError
 };

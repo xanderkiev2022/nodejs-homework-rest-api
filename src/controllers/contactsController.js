@@ -4,7 +4,8 @@ const { NotFoundError } = require("../helpers/errors");
 
 const getAll = async (req, res, next) => {
 
-const { _id } = req.user;
+  const { _id } = req.user;
+  console.log("_id :>> ", _id);
   let { page = 1, limit = 10, sort } = req.query;
   limit = limit > 10 ? 10 : parseInt(limit);
   const startIndex = (page - 1) * limit;
@@ -36,18 +37,7 @@ const update = async (req, res, next) => {
   else {
     const data = req.body;
     const contactToEdit = await serviceContacts.updateContactById(contactId, data);
-    res.status(200).json({ message: "Contact was updated", data: { contactToEdit } });
-  }
-};
-
-// TODO Однакові функції
-const updateStatus = async (req, res, next) => {
-  const { contactId } = req.params;
-  if (!mongoose.Types.ObjectId.isValid(contactId)) throw new NotFoundError("Not found");   
-  else {
-    const data = req.body;
-    const contactToEdit = await serviceContacts.updateStatusById(contactId, data);
-    res.status(200).json({ message: "Favorite status was updated", data: { contactToEdit } });
+    res.status(200).json({ message: "Update was done successfully", data: { contactToEdit } });
   }
 };
 
@@ -60,4 +50,4 @@ const remove = async (req, res, next) => {
   }
 };
 
-module.exports = { getAll, getById, add, update, updateStatus, remove, };
+module.exports = { getAll, getById, add, update, remove, };

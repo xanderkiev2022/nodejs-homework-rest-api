@@ -44,4 +44,32 @@ module.exports = {
     }
     next();
   },
+
+  registerValidation: (req, res, next) => {
+    const userValidation = Joi.object({
+      password: Joi.string().required(),
+      email: Joi.string().email().required(),
+      subscription: Joi.string(),
+      token: Joi.string(),
+    });
+
+    const validationResult = userValidation.validate(req.body);
+    if (validationResult.error) {
+      next(new ValidationError(validationResult.error.details[0].message));
+    }
+    next();
+  },
+
+  loginValidation: (req, res, next) => {
+    const userValidation = Joi.object({
+      password: Joi.string().required(),
+      email: Joi.string().email().required(),
+    });
+
+    const validationResult = userValidation.validate(req.body);
+    if (validationResult.error) {
+      next(new ValidationError(validationResult.error.details[0].message));
+    }
+    next();
+  },
 };

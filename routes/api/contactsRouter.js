@@ -12,7 +12,7 @@ router.get("/:contactId", asyncWrapper(ctrlContact.getById));
 router.post("/", addContactValidation, asyncWrapper(ctrlContact.add));
 router.put("/:contactId",  updateContactValidation, asyncWrapper(ctrlContact.update));
 router.delete("/:contactId", asyncWrapper(ctrlContact.remove));
-router.patch("/:contactId/favorite", updateFavoriteValidation, asyncWrapper(ctrlContact.updateStatus)
+router.patch("/:contactId/favorite", updateFavoriteValidation, asyncWrapper(ctrlContact.update)
 );
 
 module.exports = router; 

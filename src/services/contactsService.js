@@ -13,7 +13,7 @@ const getContacts = async (userId, { startIndex, limit, sort }) => {
   return contacts;
 };
 const getContactById = async (contactId) => {
-  const contact = await Contact.findById(contactId);
+  const contact = await Contact.findById(contactId).select({ __v: 0, owner: 0 });
   return contact;
 };
 const addContact = async (data, userId) => {
@@ -25,15 +25,7 @@ const updateContactById = async (contactId, data) => {
     { _id: contactId },
     data,
     { new: true }
-  );
-  return contactToEdit;
-};
-const updateStatusById = async (contactId, data) => {
-  const contactToEdit = await Contact.findByIdAndUpdate(
-    { _id: contactId },
-    data,
-    { new: true }
-  );
+  ).select({ __v: 0, owner: 0 });
   return contactToEdit;
 };
 const removeContact = async (contactId) => {
@@ -45,7 +37,6 @@ module.exports = {
   getContactById,
   addContact,
   updateContactById,
-  updateStatusById,
   removeContact,
   getContactsCount,
 };
