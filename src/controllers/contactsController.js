@@ -5,12 +5,12 @@ const { NotFoundError } = require("../helpers/errors");
 const getAll = async (req, res, next) => {
 
   const { _id } = req.user;
-  let { page = 1, limit = 20, sort } = req.query;
+  let { page = 1, limit = 20, sort, favorite } = req.query;
   limit = limit > 20 ? 20 : parseInt(limit);
   const skip = (page - 1) * limit;
   const totalContacts = await serviceContacts.getContactsCount(_id);
   const totalPages = Math.ceil(totalContacts / limit);
-  const contacts = await serviceContacts.getContacts(_id, {skip, limit, sort, });
+  const contacts = await serviceContacts.getContacts(_id, {skip, limit, sort, favorite});
   res.status(200).json({ message: "Success", data: { page, totalContacts, totalPages, limit, sort, contacts } });
 };
 

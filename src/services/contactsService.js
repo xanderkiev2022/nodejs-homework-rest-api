@@ -4,14 +4,18 @@ const getContactsCount = async (userId) => {
   return await Contact.countDocuments({ owner: userId });
 };
 
-const getContacts = async (userId, { skip, limit, sort }) => {
-  const contacts = await Contact.find({ owner: userId })
-    .populate('owner', '_id email')
+const getContacts = async (userId, { skip, limit, sort, favorite }) => {
+  const query = { owner: userId };
+  if (favorite !== undefined) { query.favorite = favorite; }
+
+  const totalFoundContacts = await Contact.countDocuments(query);
+  const contacts = await Contact.find(query)
+    .populate("owner", "_id email")
     .select({ __v: 0 })
     .skip(skip)
     .limit(limit)
     .sort(sort);
-  return contacts;
+  return { totalFoundContacts, contacts };
 };
 const getContactById = async (contactId) => {
   const contact = await Contact.findById(contactId).select({ __v: 0, owner: 0 });
