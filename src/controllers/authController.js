@@ -24,9 +24,17 @@ const current = async (req, res, next) => {
   res.status(200).json({ message: "OK", user: { email, subscription } });
 };
 
+const updateSubscription = async (req, res, next) => {
+  const { _id } = req.user;
+  const { subscription } = req.body;
+  const result = await serviceAuth.update(_id, subscription);
+  res.status(200).json({ message: "Subscription was updated", user: { result} });
+};
+
 module.exports = {
   registration,
   login,
   logout,
   current,
+  updateSubscription,
 };

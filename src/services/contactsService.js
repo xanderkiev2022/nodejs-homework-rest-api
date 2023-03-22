@@ -6,7 +6,8 @@ const getContactsCount = async (userId) => {
 
 const getContacts = async (userId, { skip, limit, sort }) => {
   const contacts = await Contact.find({ owner: userId })
-    .select({ __v: 0, owner: 0 })
+    .populate('owner', '_id email')
+    .select({ __v: 0 })
     .skip(skip)
     .limit(limit)
     .sort(sort);

@@ -9,5 +9,7 @@ router.post("/register", validation(register), asyncWrapper(ctrlAuth.registratio
 router.post("/login", validation(login), asyncWrapper(ctrlAuth.login));
 router.post("/logout", authMiddleware, asyncWrapper(ctrlAuth.logout));
 router.post("/current", authMiddleware, asyncWrapper(ctrlAuth.current));
+router.patch("/", authMiddleware, asyncWrapper(ctrlAuth.updateSubscription));
+
 
 module.exports = router;

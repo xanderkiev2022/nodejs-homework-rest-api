@@ -8,7 +8,7 @@ const secret = process.env.JWT_SECRET;
 
 const registration = async (data) => {
   const user = await User.findOne({ email: data.email });
-  if (user) { throw new  ConflictError(`Email ${data.email} is already in use`); }
+  if (user) { throw new ConflictError(`Email ${data.email} is already in use`); }
   const result = await User.create(data)
   return { email: result.email, subscription: result.subscription };
 };
@@ -17,8 +17,9 @@ const login = async (data) => {
   const user = await User.findOne({ email: data.email });
   if (!user || !await bcrypt.compare(data.password, user.password)) { throw new UnauthorizedError("Email or password is wrong");}
 
-  const payload = { _id: user._id, };
+  const payload = { id: user._id, };
   const token = jwt.sign(payload, secret, { expiresIn: "1h" });
+
   await User.findByIdAndUpdate(user._id, { token });
 
   return { token, email: user.email, subscription: user.subscription };
@@ -37,9 +38,21 @@ const current = async (_id) => {
   }
 };
 
+const update = async (userId, newSubscription) => {
+  const subscription = ["starter", "pro", "business"];
+  if (!subscription.includes(newSubscription)) {throw new Error("Invalid subscription");}
+  const userToEdit = await User.findByIdAndUpdate(
+    { _id: userId },
+    { subscription: newSubscription },
+    { new: true }
+  ).select({ password: 0, token: 0 });
+  return userToEdit;
+};
+
 module.exports = {
   registration,
   login,
   logout,
   current,
+  update
 };

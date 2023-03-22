@@ -22,12 +22,12 @@ module.exports = {
   },
 
   add: {
-      name: Joi.string().required(),
-      email: Joi.string().email().required(),
-      phone: Joi.string().required(),
-      favorite: Joi.bool().required(),
-    },
-
+    name: Joi.string().required(),
+    email: Joi.string().email().required(),
+    phone: Joi.string().required(),
+    favorite: Joi.bool().required(),
+  },  
+  
   updateContact: {
       name: Joi.string(),
       email: Joi.string().email(),
