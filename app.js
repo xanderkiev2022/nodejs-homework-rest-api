@@ -3,9 +3,8 @@ const logger = require('morgan')
 const cors = require('cors')
 const { errorHandler } = require("./src/helpers/apiHelpers");
 
+const authRouter = require("./routes/api/authRouter");
 const contactsRouter = require('./routes/api/contactsRouter')
-const { authRouter } = require('./routes/api/authRouter');
-// TODO authRouter rename
 
 const app = express()
 
