@@ -6,27 +6,22 @@ const { UnauthorizedError, ConflictError } = require("../helpers/errors");
 
 const secret = process.env.JWT_SECRET;
 
-const registration = async (email, password) => {
-  const user = await User.findOne({ email });
-  if (user) { throw new ConflictError(`Email ${email} is already in use`); }
-
-  try {
-    const newUser = new User({ email, password });
-    await newUser.save();
-  } catch (error) {
-
-  }
+const registration = async (data) => {
+  const user = await User.findOne({ email: data.email });
+  if (user) { throw new  ConflictError(`Email ${data.email} is already in use`); }
+  const result = await User.create(data)
+  return { email: result.email, subscription: result.subscription };
 };
-const login = async (email, password) => {
-  const user = await User.findOne({ email });
-  if (!user || !await bcrypt.compare(password, user.password)) {
-    throw new UnauthorizedError("Email or password is wrong");
-  }
+
+const login = async (data) => {
+  const user = await User.findOne({ email: data.email });
+  if (!user || !await bcrypt.compare(data.password, user.password)) { throw new UnauthorizedError("Email or password is wrong");}
 
   const payload = { _id: user._id, };
   const token = jwt.sign(payload, secret, { expiresIn: "1h" });
   await User.findByIdAndUpdate(user._id, { token });
-  return token;
+
+  return { token, email: user.email, subscription: user.subscription };
 };
 
 const logout = async (_id) => {

@@ -1,15 +1,15 @@
 const serviceAuth = require("../../src/services/authService");
 
 const registration = async (req, res, next) => {
-  const { email, password, subscription = "starter" } = req.body;
-    await serviceAuth.registration(email, password);
-    res.status(201).json({ message: "Created", user: { email, subscription } });
+  const data = req.body;
+  const result = await serviceAuth.registration(data);
+  res.status(201).json({ message: "Created", user: { result } });
 };
 
 const login = async (req, res, next) => {
-  const { email, password, subscription = "starter" } = req.body;
-  const token = await serviceAuth.login(email, password);
-  res.status(200).json({ message: "Success login", token, user: { email, subscription } });
+  const data = req.body;
+  const result = await serviceAuth.login(data);
+  res.status(200).json({ message: "Success login", token: result.token, user: { eamil: result.email, subscription: result.subscription },});
 };
 
 const logout = async (req, res, next) => {
@@ -21,7 +21,7 @@ const logout = async (req, res, next) => {
 const current = async (req, res, next) => {
   const { _id, email, subscription } = req.user;
   await serviceAuth.current(_id);
-   res.status(200).json({ message: "OK", user: { email, subscription } });
+  res.status(200).json({ message: "OK", user: { email, subscription } });
 };
 
 module.exports = {
