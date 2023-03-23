@@ -41,6 +41,7 @@ const current = async (userId) => {
 const update = async (userId, newSubscription) => {
   const userToEdit = await User.findByIdAndUpdate(userId,
     { subscription: newSubscription },
+    { runValidators: true },
     { new: true }
   ).select({ password: 0, token: 0 });
   return userToEdit;
