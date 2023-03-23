@@ -8,10 +8,8 @@ const getAll = async (req, res, next) => {
   let { page = 1, limit = 20, sort, favorite } = req.query;
   limit = limit > 20 ? 20 : parseInt(limit);
   const skip = (page - 1) * limit;
-  const totalContacts = await serviceContacts.getContactsCount(_id);
-  const totalPages = Math.ceil(totalContacts / limit);
-  const contacts = await serviceContacts.getContacts(_id, {skip, limit, sort, favorite});
-  res.status(200).json({ message: "Success", data: { page, totalContacts, totalPages, limit, sort, contacts } });
+  const {totalContacts, totalPages, contacts} = await serviceContacts.getContacts(_id, {skip, limit, sort, favorite});
+  res.status(200).json({ message: "Success", data: { page, limit, sort, totalContacts, totalPages, contacts }});
 };
 
 const getById = async (req, res, next) => {

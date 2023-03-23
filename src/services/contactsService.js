@@ -1,21 +1,18 @@
 const { Contact } = require("../db/contactModel");
 
-const getContactsCount = async (userId) => {
-  return await Contact.countDocuments({ owner: userId });
-};
-
 const getContacts = async (userId, { skip, limit, sort, favorite }) => {
   const query = { owner: userId };
   if (favorite !== undefined) { query.favorite = favorite; }
 
-  const totalFoundContacts = await Contact.countDocuments(query);
+  const totalContacts = await Contact.countDocuments(query);
+  const totalPages = Math.ceil(totalContacts / limit);
   const contacts = await Contact.find(query)
     .populate("owner", "_id email")
     .select({ __v: 0 })
     .skip(skip)
     .limit(limit)
     .sort(sort);
-  return { totalFoundContacts, contacts };
+  return { totalContacts, totalPages, contacts };
 };
 const getContactById = async (contactId) => {
   const contact = await Contact.findById(contactId).select({ __v: 0, owner: 0 });
@@ -26,15 +23,11 @@ const addContact = async (data, userId) => {
   return newContact;
 };
 const updateContactById = async (contactId, data) => {
-  const contactToEdit = await Contact.findByIdAndUpdate(
-    { _id: contactId },
-    data,
-    { new: true }
-  ).select({ __v: 0, owner: 0 });
+  const contactToEdit = await Contact.findByIdAndUpdate(contactId, data, { new: true }).select({ __v: 0, owner: 0 });
   return contactToEdit;
 };
 const removeContact = async (contactId) => {
-  await Contact.findByIdAndRemove({ _id: contactId });
+  await Contact.findByIdAndRemove(contactId);
 };
 
 module.exports = {
@@ -43,5 +36,4 @@ module.exports = {
   addContact,
   updateContactById,
   removeContact,
-  getContactsCount,
 };

@@ -25,14 +25,14 @@ const login = async (data) => {
   return { token, email: user.email, subscription: user.subscription };
 };
 
-const logout = async (_id) => {
-  const user = await User.findOne({ _id });
+const logout = async (userId) => {
+  const user = await User.findById(userId);
   if (!user) {throw new UnauthorizedError("Not authorized");}
-  await User.findByIdAndUpdate(_id, { token: null });
+  await User.findByIdAndUpdate(userId, { token: null });
 };
 
-const current = async (_id) => {
-  const user = await User.findOne({ _id });
+const current = async (userId) => {
+  const user = await User.findById(userId);
   if (!user) {
     throw new UnauthorizedError("Not authorized");
   }
@@ -41,8 +41,7 @@ const current = async (_id) => {
 const update = async (userId, newSubscription) => {
   const subscription = ["starter", "pro", "business"];
   if (!subscription.includes(newSubscription)) {throw new Error("Invalid subscription");}
-  const userToEdit = await User.findByIdAndUpdate(
-    { _id: userId },
+  const userToEdit = await User.findByIdAndUpdate(userId,
     { subscription: newSubscription },
     { new: true }
   ).select({ password: 0, token: 0 });
