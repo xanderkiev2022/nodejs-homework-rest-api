@@ -39,8 +39,6 @@ const current = async (userId) => {
 };
 
 const update = async (userId, newSubscription) => {
-  const subscription = ["starter", "pro", "business"];
-  if (!subscription.includes(newSubscription)) {throw new Error("Invalid subscription");}
   const userToEdit = await User.findByIdAndUpdate(userId,
     { subscription: newSubscription },
     { new: true }
