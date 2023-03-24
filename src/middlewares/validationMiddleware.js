@@ -2,46 +2,48 @@ const Joi = require("joi");
 const { ValidationError } = require("../helpers/errors");
 
 module.exports = {
-  addContactValidation: (req, res, next) => {
-    const contactValidation = Joi.object({
-      name: Joi.string().required(),
-      email: Joi.string().email().required(),
-      phone: Joi.string().required(),
-      favorite: Joi.bool().required(),
-    });
-
-    const validationResult = contactValidation.validate(req.body);
+  validation: (rules) => (req, res, next) => {
+    const validationSchema = Joi.object(rules);
+    const validationResult = validationSchema.validate(req.body);
     if (validationResult.error) {
       next(new ValidationError(validationResult.error.details[0].message));
     }
     next();
   },
 
-  updateContactValidation: (req, res, next) => {
-    const contactValidation = Joi.object({
-      name: Joi.string(),
-      email: Joi.string().email(),
-      phone: Joi.string(),
-      favorite: Joi.bool(),
-    });
-
-    const validationResult = contactValidation.validate(req.body);
-    if (validationResult.error) {
-      next(new ValidationError(validationResult.error.details[0].message));
-    }
-    next();
+  register: {
+    password: Joi.string().required(),
+    email: Joi.string().email().required(),
+    subscription: Joi.string(),
+    token: Joi.string(),
   },
 
-  updateFavoriteValidation: (req, res, next) => {
-    const favoriteValidation = Joi.object({
-      favorite: Joi.bool()
-        .required()
-        .messages({ "any.required": "Missing field favorite" }),
-    });
-    const validationResult = favoriteValidation.validate(req.body);
-    if (validationResult.error) {
-      next(new ValidationError(validationResult.error.details[0].message));
-    }
-    next();
+  login: {
+    password: Joi.string().required(),
+    email: Joi.string().email().required(),
+  },
+
+  subscription: {
+    subscription: Joi.string().valid("starter", "pro", "business").required(),
+  },
+
+  add: {
+    name: Joi.string().required(),
+    email: Joi.string().email().required(),
+    phone: Joi.string().required(),
+    favorite: Joi.bool().required(),
+  },
+
+  updateContact: {
+    name: Joi.string(),
+    email: Joi.string().email(),
+    phone: Joi.string(),
+    favorite: Joi.bool(),
+  },
+
+  updateFavorite: {
+    favorite: Joi.bool()
+      .required()
+      .messages({ "any.required": "Missing field favorite" }),
   },
 };
