@@ -31,10 +31,18 @@ const updateSubscription = async (req, res, next) => {
   res.status(200).json({ message: "Subscription was updated", user: { result} });
 };
 
+const updateAvatar = async (req, res, next) => {
+  const { _id } = req.user;
+  const avatarData = req.file;
+  const avatarURL = await serviceAuth.updateAvatar(_id, avatarData);
+  res.status(200).json({ message: "Avatar was updated", avatarURL });
+};
+
 module.exports = {
   registration,
   login,
   logout,
   current,
   updateSubscription,
+  updateAvatar,
 };

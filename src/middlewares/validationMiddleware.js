@@ -27,6 +27,10 @@ module.exports = {
     subscription: Joi.string().valid("starter", "pro", "business").required(),
   },
 
+  avatar: {
+    // subscription: Joi.string().valid("starter", "pro", "business").required(),
+  },
+
   add: {
     name: Joi.string().required(),
     email: Joi.string().email().required(),
