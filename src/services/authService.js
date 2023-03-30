@@ -8,6 +8,7 @@ const { nanoid } = require("nanoid");
 require("dotenv").config();
 const { User } = require("../db/userModel");
 const { UnauthorizedError, ConflictError } = require("../helpers/errors");
+const { uploadToGoogleStorage } = require("../../google-storage");
 
 const secret = process.env.JWT_SECRET;
 
@@ -66,6 +67,8 @@ const updateAvatar = async (userId, avatarData) => {
     const newDir = path.join(linkToPublicFolder, imgNameInPublic);
 
     await fs.rename(tempDir, newDir);
+    uploadToGoogleStorage(imgNameInPublic, newDir).catch(console.error);;
+
     const avatarURL = path.join("public", "avatars", imgNameInPublic);
     await User.findByIdAndUpdate(userId, { avatarURL });
     return avatarURL;

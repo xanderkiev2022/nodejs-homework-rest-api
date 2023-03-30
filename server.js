@@ -1,25 +1,8 @@
 const app = require("./app");
-const fs = require('fs').promises;
-const path = require('path');
+
 require("dotenv").config();
 const { connectMongo } = require("./src/db/connections");
-
-const uploadDir = path.join(process.cwd(), 'tmp');
-const folderPublic = path.join(process.cwd(), 'public');
-const folderAvatars = path.join(folderPublic, 'avatars');
-
-const isAccessible = path => {
-  return fs
-    .access(path)
-    .then(() => true)
-    .catch(() => false);
-};
-
-const createFolderIsNotExist = async folder => {
-  if (!(await isAccessible(folder))) {
-    await fs.mkdir(folder);
-  }
-};
+const { createFolderIsNotExist, uploadDir, folderPublic, folderAvatars } = require("./src/helpers/createFolders");
 
 const satrt = async () => {
   try {
