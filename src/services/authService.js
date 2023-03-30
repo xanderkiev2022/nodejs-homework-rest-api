@@ -54,20 +54,21 @@ const update = async (userId, newSubscription) => {
 };
 
 const updateAvatar = async (userId, avatarData) => {
-  const { path: tempDir, originalname} = avatarData;
+  const { path: tempDir, originalname } = avatarData;
   try {
-    const id = nanoid();
+    const img = await Jimp.read(tempDir);
+    await img.autocrop().cover(250, 250, Jimp.HORIZONTAL_ALIGN_CENTER || Jimp.VERTICAL_ALIGN_MIDDLE,).writeAsync(tempDir);
+    
     const [filename, extension] = originalname.split(".");
+    const id = nanoid();
     const imgNameInPublic = `${filename}_${id}.${extension}`;
     const linkToPublicFolder = path.join(__dirname, "../../", "public", "avatars");
     const newDir = path.join(linkToPublicFolder, imgNameInPublic);
 
     await fs.rename(tempDir, newDir);
-    const avatar = await Jimp.read(`public/avatars/${imgNameInPublic}`);
-    avatar.resize(250, 250);
     const avatarURL = path.join("public", "avatars", imgNameInPublic);
-    const result = await User.findByIdAndUpdate(userId, { avatarURL });
-    return { avatarURL: result.avatarURL};
+    await User.findByIdAndUpdate(userId, { avatarURL });
+    return avatarURL;
   } catch (err) {
     await fs.unlink(tempDir);
     throw err;

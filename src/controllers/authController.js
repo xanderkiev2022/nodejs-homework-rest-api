@@ -1,4 +1,5 @@
 const serviceAuth = require("../../src/services/authService");
+const { ValidationError } = require("../helpers/errors");
 
 const registration = async (req, res, next) => {
   const data = req.body;
@@ -34,6 +35,7 @@ const updateSubscription = async (req, res, next) => {
 const updateAvatar = async (req, res, next) => {
   const { _id } = req.user;
   const avatarData = req.file;
+  if (!avatarData) throw new ValidationError("Wrong type of image");  
   const avatarURL = await serviceAuth.updateAvatar(_id, avatarData);
   res.status(200).json({ message: "Avatar was updated", avatarURL });
 };

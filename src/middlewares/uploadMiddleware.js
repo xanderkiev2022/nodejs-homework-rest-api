@@ -7,15 +7,9 @@ const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, tempDir);
   },
-  filename: (req, file, cb) => {
-    // const [filename, extension] = file.originalname.split(".");
-    // if (extension !== "jpg") {
-    //     throw new Error('Wrong type of image, has to be ".jpg"');
-    // }
-    // cb(null, `${filename}_${nanoid()}.${extension}`);
+    filename: (req, file, cb) => {
     cb(null, file.originalname );
   },
-  // limits: { fileSize: 1 },
 });
 
 const uploadMiddleware = multer({ 
