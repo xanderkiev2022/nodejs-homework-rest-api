@@ -14,8 +14,8 @@ const secret = process.env.JWT_SECRET;
 const registration = async (data) => {
   const user = await User.findOne({ email: data.email });
   if (user) { throw new ConflictError(`Email ${data.email} is already in use`); }
-  const avatar = gravatar.url(data.email, { protocol: "https", s: "250" });
-  const result = await User.create({...data, avatarURL: avatar})
+  const avatarURL = gravatar.url(data.email, { protocol: 'https', s: '100' });
+  const result = await User.create({...data, avatarURL})
   return { email: result.email, subscription: result.subscription, avatarURL: result.avatarURL };
 };
 
@@ -53,26 +53,24 @@ const update = async (userId, newSubscription) => {
   return userToEdit;
 };
 
-// ПОМИЛКА
 const updateAvatar = async (userId, avatarData) => {
-  const { path: tempDir, originalname } = avatarData;
-  const [filename, extension] = originalname.split(".");
-  const id = nanoid();
-  const imgDir = path.join(__dirname, "../../public/avatars");
-  const imgName = `${filename}_${id}.${extension}`;
-  const newDir = path.join(imgDir, imgName);
-
+  const { path: tempDir, originalname} = avatarData;
   try {
+    const id = nanoid();
+    const [filename, extension] = originalname.split(".");
+    const imgNameInPublic = `${filename}_${id}.${extension}`;
+    const linkToPublicFolder = path.join(__dirname, "../../", "public", "avatars");
+    const newDir = path.join(linkToPublicFolder, imgNameInPublic);
+
     await fs.rename(tempDir, newDir);
-    const avatar = await Jimp.read(`public/avatars/${imgName}`);
-    // await avatar.writeAsync(imgDir+imgName);
+    const avatar = await Jimp.read(`public/avatars/${imgNameInPublic}`);
     avatar.resize(250, 250);
-    // const avatarURL = path.join("public", "avatars", imgName);
-    const avatarURL = path.join(`public/avatars/${imgName}`);
+    const avatarURL = path.join("public", "avatars", imgNameInPublic);
     const result = await User.findByIdAndUpdate(userId, { avatarURL });
-    return result;
+    return { avatarURL: result.avatarURL};
   } catch (err) {
     await fs.unlink(tempDir);
+    throw err;
   }
 };
 
