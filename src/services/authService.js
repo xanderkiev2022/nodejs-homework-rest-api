@@ -11,6 +11,7 @@ const { UnauthorizedError, ConflictError } = require("../helpers/errors");
 const { uploadToGoogleStorage } = require("../../google-storage");
 
 const secret = process.env.JWT_SECRET;
+const baseURL = process.env.BASE_URL;
 
 const registration = async (data) => {
   const user = await User.findOne({ email: data.email });
@@ -69,7 +70,9 @@ const updateAvatar = async (userId, avatarData) => {
     await fs.rename(tempDir, newDir);
     uploadToGoogleStorage(imgNameInPublic, newDir).catch(console.error);;
 
-    const avatarURL = path.join("public", "avatars", imgNameInPublic);
+    // const avatarURL = path.join("public", "avatars", imgNameInPublic);
+    // const avatarURL = path.join(`http://localhost:3000/api/users/avatars/${imgNameInPublic}`);
+    const avatarURL = `${baseURL}/api/users/avatars/${imgNameInPublic}`;
     await User.findByIdAndUpdate(userId, { avatarURL });
     return avatarURL;
   } catch (err) {
@@ -77,6 +80,8 @@ const updateAvatar = async (userId, avatarData) => {
     throw err;
   }
 };
+
+
 
 module.exports = {
   registration,
