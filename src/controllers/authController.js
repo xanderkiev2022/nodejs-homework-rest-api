@@ -10,7 +10,7 @@ const registration = async (req, res, next) => {
 const login = async (req, res, next) => {
   const data = req.body;
   const result = await serviceAuth.login(data);
-  res.status(200).json({ message: "Success login", token: result.token, user: { eamil: result.email, subscription: result.subscription },});
+  res.status(200).json({ message: "Success login", token: result.token, user: { email: result.email, subscription: result.subscription },});
 };
 
 const logout = async (req, res, next) => {
