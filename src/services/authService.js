@@ -1,24 +1,16 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const path = require("path");
-const fs = require("fs").promises;
-const gravatar = require("gravatar");
-const Jimp = require("jimp");
-const { nanoid } = require("nanoid");
 require("dotenv").config();
 const { User } = require("../db/userModel");
 const { UnauthorizedError, ConflictError } = require("../helpers/errors");
-const { uploadToGoogleStorage } = require("../../google-storage");
 
 const secret = process.env.JWT_SECRET;
-const baseURL = process.env.BASE_URL;
 
 const registration = async (data) => {
   const user = await User.findOne({ email: data.email });
   if (user) { throw new ConflictError(`Email ${data.email} is already in use`); }
-  const avatarURL = gravatar.url(data.email, { protocol: 'https', s: '100' });
-  const result = await User.create({...data, avatarURL})
-  return { email: result.email, subscription: result.subscription, avatarURL: result.avatarURL };
+  const result = await User.create(data)
+  return { email: result.email, subscription: result.subscription };
 };
 
 const login = async (data) => {
@@ -79,13 +71,11 @@ const updateAvatar = async (userId, avatarData) => {
   }
 };
 
-
-
 module.exports = {
   registration,
   login,
   logout,
   current,
   update,
-  updateAvatar,
+  updateAvatar
 };
