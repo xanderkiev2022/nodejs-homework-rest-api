@@ -79,13 +79,11 @@ const updateAvatar = async (userId, avatarData) => {
   }
 };
 
-
-
 module.exports = {
   registration,
   login,
   logout,
   current,
   update,
-  updateAvatar,
+  updateAvatar
 };
