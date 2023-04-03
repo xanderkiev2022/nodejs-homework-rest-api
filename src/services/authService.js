@@ -1,24 +1,16 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const path = require("path");
-const fs = require("fs").promises;
-const gravatar = require("gravatar");
-const Jimp = require("jimp");
-const { nanoid } = require("nanoid");
 require("dotenv").config();
 const { User } = require("../db/userModel");
 const { UnauthorizedError, ConflictError } = require("../helpers/errors");
-const { uploadToGoogleStorage } = require("../../google-storage");
 
 const secret = process.env.JWT_SECRET;
-const baseURL = process.env.BASE_URL;
 
 const registration = async (data) => {
   const user = await User.findOne({ email: data.email });
   if (user) { throw new ConflictError(`Email ${data.email} is already in use`); }
-  const avatarURL = gravatar.url(data.email, { protocol: 'https', s: '100' });
-  const result = await User.create({...data, avatarURL})
-  return { email: result.email, subscription: result.subscription, avatarURL: result.avatarURL };
+  const result = await User.create(data)
+  return { email: result.email, subscription: result.subscription };
 };
 
 const login = async (data) => {
@@ -55,39 +47,10 @@ const update = async (userId, newSubscription) => {
   return userToEdit;
 };
 
-const updateAvatar = async (userId, avatarData) => {
-  const { path: tempDir, originalname } = avatarData;
-  try {
-    const img = await Jimp.read(tempDir);
-    await img.autocrop().cover(250, 250, Jimp.HORIZONTAL_ALIGN_CENTER || Jimp.VERTICAL_ALIGN_MIDDLE,).writeAsync(tempDir);
-    
-    const [filename, extension] = originalname.split(".");
-    const id = nanoid();
-    const imgNameInPublic = `${filename}_${id}.${extension}`;
-    const linkToPublicFolder = path.join(__dirname, "../../", "public", "avatars");
-    const newDir = path.join(linkToPublicFolder, imgNameInPublic);
-
-    await fs.rename(tempDir, newDir);
-    uploadToGoogleStorage(imgNameInPublic, newDir).catch(console.error);;
-
-    // const avatarURL = path.join("public", "avatars", imgNameInPublic);
-    // const avatarURL = path.join(`http://localhost:3000/api/users/avatars/${imgNameInPublic}`);
-    const avatarURL = `${baseURL}/api/users/avatars/${imgNameInPublic}`;
-    await User.findByIdAndUpdate(userId, { avatarURL });
-    return avatarURL;
-  } catch (err) {
-    await fs.unlink(tempDir);
-    throw err;
-  }
-};
-
-
-
 module.exports = {
   registration,
   login,
   logout,
   current,
-  update,
-  updateAvatar,
+  update
 };
