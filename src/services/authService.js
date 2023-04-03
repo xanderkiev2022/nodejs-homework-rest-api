@@ -70,8 +70,6 @@ const updateAvatar = async (userId, avatarData) => {
     await fs.rename(tempDir, newDir);
     uploadToGoogleStorage(imgNameInPublic, newDir).catch(console.error);;
 
-    // const avatarURL = path.join("public", "avatars", imgNameInPublic);
-    // const avatarURL = path.join(`http://localhost:3000/api/users/avatars/${imgNameInPublic}`);
     const avatarURL = `${baseURL}/api/users/avatars/${imgNameInPublic}`;
     await User.findByIdAndUpdate(userId, { avatarURL });
     return avatarURL;
