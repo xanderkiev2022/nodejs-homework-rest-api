@@ -1,5 +1,5 @@
 const serviceAuth = require("../../src/services/authService");
-const { ValidationError } = require("../helpers/errors");
+const { ValidationError, NotFoundError } = require("../helpers/errors");
 
 const registration = async (req, res, next) => {
   const data = req.body;
@@ -10,13 +10,16 @@ const registration = async (req, res, next) => {
 const login = async (req, res, next) => {
   const data = req.body;
   const result = await serviceAuth.login(data);
-  res
-    .status(200)
-    .json({
-      message: "Success login",
-      token: result.token,
-      user: { email: result.email, subscription: result.subscription },
-    });
+  res.status(200).json({
+    message: "Success login",
+    token: result.token,
+    user: {
+      email: result.email,
+      subscription: result.subscription,
+      // verificationToken: result.verificationToken,
+      // verify: result.verify,
+    },
+  });
 };
 
 const logout = async (req, res, next) => {
@@ -48,6 +51,13 @@ const updateAvatar = async (req, res, next) => {
   res.status(200).json({ message: "Avatar was updated", avatarURL });
 };
 
+const verify = async (req, res, next) => {
+  const { verificationToken } = req.params;
+  if (!verificationToken) throw new NotFoundError("User not found");
+  const response = await serviceAuth.verifyEmail(verificationToken);
+  res.status(200).json({ message: "Verification successful", response });
+};
+
 module.exports = {
   registration,
   login,
@@ -55,4 +65,5 @@ module.exports = {
   current,
   updateSubscription,
   updateAvatar,
+  verify,
 };

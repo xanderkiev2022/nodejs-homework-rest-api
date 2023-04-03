@@ -9,6 +9,7 @@ require("dotenv").config();
 const { User } = require("../db/userModel");
 const { UnauthorizedError, ConflictError } = require("../helpers/errors");
 const { uploadToGoogleStorage } = require("../../google-storage");
+const { sendVerificationEmail } = require("../middlewares/emailVerification");
 
 const secret = process.env.JWT_SECRET;
 const baseURL = process.env.BASE_URL;
@@ -17,7 +18,9 @@ const registration = async (data) => {
   const user = await User.findOne({ email: data.email });
   if (user) { throw new ConflictError(`Email ${data.email} is already in use`); }
   const avatarURL = gravatar.url(data.email, { protocol: 'https', s: '100' });
-  const result = await User.create({...data, avatarURL})
+  const verificationToken = nanoid();
+  sendVerificationEmail(data.email, verificationToken);
+  const result = await User.create({ ...data, avatarURL, verificationToken });
   return { email: result.email, subscription: result.subscription, avatarURL: result.avatarURL };
 };
 
@@ -30,7 +33,13 @@ const login = async (data) => {
 
   await User.findByIdAndUpdate(user._id, { token });
 
-  return { token, email: user.email, subscription: user.subscription };
+  return {
+    token,
+    email: user.email,
+    subscription: user.subscription,
+    // verificationToken: user.verificationToken,
+    // verify: user.verify,
+  };
 };
 
 const logout = async (userId) => {
@@ -79,11 +88,24 @@ const updateAvatar = async (userId, avatarData) => {
   }
 };
 
+const verifyEmail = async (verificationToken) => { 
+  const verify = await User.findOneAndUpdate(
+    { verificationToken: verificationToken },
+    { verify: true, }
+  );
+ await User.findOneAndUpdate(
+      { verificationToken: verificationToken },
+      { verificationToken: null }
+    );
+  return verify;
+};
+
 module.exports = {
   registration,
   login,
   logout,
   current,
   update,
-  updateAvatar
+  updateAvatar,
+  verifyEmail,
 };

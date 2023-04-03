@@ -13,5 +13,6 @@ router.post("/logout", authMiddleware, asyncWrapper(ctrlAuth.logout));
 router.post("/current", authMiddleware, asyncWrapper(ctrlAuth.current));
 router.patch("/", authMiddleware, validation(subscription), asyncWrapper(ctrlAuth.updateSubscription));
 router.patch("/avatars", authMiddleware, uploadMiddleware.single('avatar'), asyncWrapper(ctrlAuth.updateAvatar));
+router.get("/verify/:verificationToken", asyncWrapper(ctrlAuth.verify));
 
 module.exports = router;
