@@ -47,10 +47,35 @@ const update = async (userId, newSubscription) => {
   return userToEdit;
 };
 
+const updateAvatar = async (userId, avatarData) => {
+  const { path: tempDir, originalname } = avatarData;
+  try {
+    const img = await Jimp.read(tempDir);
+    await img.autocrop().cover(250, 250, Jimp.HORIZONTAL_ALIGN_CENTER || Jimp.VERTICAL_ALIGN_MIDDLE,).writeAsync(tempDir);
+    
+    const [filename, extension] = originalname.split(".");
+    const id = nanoid();
+    const imgNameInPublic = `${filename}_${id}.${extension}`;
+    const linkToPublicFolder = path.join(__dirname, "../../", "public", "avatars");
+    const newDir = path.join(linkToPublicFolder, imgNameInPublic);
+
+    await fs.rename(tempDir, newDir);
+    uploadToGoogleStorage(imgNameInPublic, newDir).catch(console.error);;
+
+    const avatarURL = `${baseURL}/api/users/avatars/${imgNameInPublic}`;
+    await User.findByIdAndUpdate(userId, { avatarURL });
+    return avatarURL;
+  } catch (err) {
+    await fs.unlink(tempDir);
+    throw err;
+  }
+};
+
 module.exports = {
   registration,
   login,
   logout,
   current,
-  update
+  update,
+  updateAvatar
 };
