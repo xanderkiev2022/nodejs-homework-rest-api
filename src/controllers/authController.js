@@ -1,5 +1,5 @@
 const serviceAuth = require("../../src/services/authService");
-const { ValidationError, NotFoundError } = require("../helpers/errors");
+const { ValidationError } = require("../helpers/errors");
 
 const registration = async (req, res, next) => {
   const data = req.body;
@@ -16,8 +16,6 @@ const login = async (req, res, next) => {
     user: {
       email: result.email,
       subscription: result.subscription,
-      // verificationToken: result.verificationToken,
-      // verify: result.verify,
     },
   });
 };
@@ -38,9 +36,7 @@ const updateSubscription = async (req, res, next) => {
   const { _id } = req.user;
   const { subscription } = req.body;
   const result = await serviceAuth.update(_id, subscription);
-  res
-    .status(200)
-    .json({ message: "Subscription was updated", user: { result } });
+  res.status(200).json({ message: "Subscription was updated", user: { result } });
 };
 
 const updateAvatar = async (req, res, next) => {
@@ -53,9 +49,14 @@ const updateAvatar = async (req, res, next) => {
 
 const verify = async (req, res, next) => {
   const { verificationToken } = req.params;
-  if (!verificationToken) throw new NotFoundError("User not found");
-  const response = await serviceAuth.verifyEmail(verificationToken);
-  res.status(200).json({ message: "Verification successful", response });
+  await serviceAuth.verifyEmail(verificationToken);
+  res.status(200).json({ message: "Verification successful" });
+};
+
+const resendVerify = async (req, res, next) => {
+  const { email } = req.body;
+  await serviceAuth.resendVerifyEmail(email);
+  res.status(200).json({ message: "Verification link was send, check your mailbox"});
 };
 
 module.exports = {
@@ -66,4 +67,5 @@ module.exports = {
   updateSubscription,
   updateAvatar,
   verify,
+  resendVerify,
 };

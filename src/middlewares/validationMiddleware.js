@@ -18,6 +18,10 @@ module.exports = {
     token: Joi.string(),
   },
 
+  email: {
+    email: Joi.string().email().required(),
+  },
+
   login: {
     password: Joi.string().required(),
     email: Joi.string().email().required(),

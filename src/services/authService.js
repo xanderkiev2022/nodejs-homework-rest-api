@@ -7,19 +7,26 @@ const Jimp = require("jimp");
 const { nanoid } = require("nanoid");
 require("dotenv").config();
 const { User } = require("../db/userModel");
-const { UnauthorizedError, ConflictError } = require("../helpers/errors");
+const { UnauthorizedError, ConflictError, NotFoundError } = require("../helpers/errors");
 const { uploadToGoogleStorage } = require("../../google-storage");
-const { sendVerificationEmail } = require("../middlewares/emailVerification");
+const { sendEmail } = require("../helpers/sendEmail");
 
-const secret = process.env.JWT_SECRET;
-const baseURL = process.env.BASE_URL;
+const { JWT_SECRET, BASE_URL } = process.env;
 
 const registration = async (data) => {
   const user = await User.findOne({ email: data.email });
   if (user) { throw new ConflictError(`Email ${data.email} is already in use`); }
   const avatarURL = gravatar.url(data.email, { protocol: 'https', s: '100' });
   const verificationToken = nanoid();
-  sendVerificationEmail(data.email, verificationToken);
+  
+  const verifyEmail = {
+    to: `${data.email}`,
+    subject: "Sending with SendGrid is Fun",
+    text: "and easy to do anywhere, even with Node.js",
+    html: `Verification link: ${BASE_URL}/api/users/verify/${verificationToken}`,
+  };
+  sendEmail(verifyEmail);
+
   const result = await User.create({ ...data, avatarURL, verificationToken });
   return { email: result.email, subscription: result.subscription, avatarURL: result.avatarURL };
 };
@@ -29,7 +36,7 @@ const login = async (data) => {
   if (!user || !await bcrypt.compare(data.password, user.password)) { throw new UnauthorizedError("Email or password is wrong");}
 
   const payload = { id: user._id, };
-  const token = jwt.sign(payload, secret, { expiresIn: "1h" });
+  const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "1h" });
 
   await User.findByIdAndUpdate(user._id, { token });
 
@@ -37,8 +44,6 @@ const login = async (data) => {
     token,
     email: user.email,
     subscription: user.subscription,
-    // verificationToken: user.verificationToken,
-    // verify: user.verify,
   };
 };
 
@@ -79,7 +84,7 @@ const updateAvatar = async (userId, avatarData) => {
     await fs.rename(tempDir, newDir);
     uploadToGoogleStorage(imgNameInPublic, newDir).catch(console.error);;
 
-    const avatarURL = `${baseURL}/api/users/avatars/${imgNameInPublic}`;
+    const avatarURL = `${BASE_URL}/api/users/avatars/${imgNameInPublic}`;
     await User.findByIdAndUpdate(userId, { avatarURL });
     return avatarURL;
   } catch (err) {
@@ -89,15 +94,27 @@ const updateAvatar = async (userId, avatarData) => {
 };
 
 const verifyEmail = async (verificationToken) => { 
-  const verify = await User.findOneAndUpdate(
-    { verificationToken: verificationToken },
-    { verify: true, }
+  const user = await User.findOne({verificationToken});
+  if (!user) throw new NotFoundError("User not found");
+  await User.findByIdAndUpdate(
+    user._id,
+    { verify: true, $unset: { verificationToken: "" } },
+    { new: true }
   );
- await User.findOneAndUpdate(
-      { verificationToken: verificationToken },
-      { verificationToken: null }
-    );
-  return verify;
+};
+
+const resendVerifyEmail = async (email) => {
+  const user = await User.findOne({ email });
+  if (!user) throw new NotFoundError("User not found");
+  if (user.verify) throw new NotFoundError("Email already vefified");
+
+  const verifyEmail = {
+    to: `${user.email}`,
+    subject: "Sending with SendGrid is Fun",
+    text: "and easy to do anywhere, even with Node.js",
+    html: `Verification link: ${BASE_URL}/api/users/verify/${user.verificationToken}`,
+  };
+  sendEmail(verifyEmail);
 };
 
 module.exports = {
@@ -108,4 +125,5 @@ module.exports = {
   update,
   updateAvatar,
   verifyEmail,
+  resendVerifyEmail,
 };
