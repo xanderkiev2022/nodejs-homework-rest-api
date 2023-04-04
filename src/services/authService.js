@@ -7,7 +7,7 @@ const Jimp = require("jimp");
 const { nanoid } = require("nanoid");
 require("dotenv").config();
 const { User } = require("../db/userModel");
-const { UnauthorizedError, ConflictError, NotFoundError } = require("../helpers/errors");
+const { UnauthorizedError, ConflictError, NotFoundError, ValidationError } = require("../helpers/errors");
 const { uploadToGoogleStorage } = require("../../google-storage");
 const { sendEmail } = require("../helpers/sendEmail");
 
@@ -106,7 +106,7 @@ const verifyEmail = async (verificationToken) => {
 const resendVerifyEmail = async (email) => {
   const user = await User.findOne({ email });
   if (!user) throw new NotFoundError("User not found");
-  if (user.verify) throw new NotFoundError("Email already vefified");
+  if (user.verify) throw new ValidationError("Verification has already been passed");
 
   const verifyEmail = {
     to: `${user.email}`,

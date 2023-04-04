@@ -55,8 +55,9 @@ const verify = async (req, res, next) => {
 
 const resendVerify = async (req, res, next) => {
   const { email } = req.body;
+  if (!email) throw new ValidationError("Missing required field email");
   await serviceAuth.resendVerifyEmail(email);
-  res.status(200).json({ message: "Verification link was send, check your mailbox"});
+  res.status(200).json({ message: "Verification email sent" });
 };
 
 module.exports = {
