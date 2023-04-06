@@ -10,13 +10,14 @@ const registration = async (req, res, next) => {
 const login = async (req, res, next) => {
   const data = req.body;
   const result = await serviceAuth.login(data);
-  res
-    .status(200)
-    .json({
-      message: "Success login",
-      token: result.token,
-      user: { email: result.email, subscription: result.subscription },
-    });
+  res.status(200).json({
+    message: "Success login",
+    token: result.token,
+    user: {
+      email: result.email,
+      subscription: result.subscription,
+    },
+  });
 };
 
 const logout = async (req, res, next) => {
@@ -35,9 +36,7 @@ const updateSubscription = async (req, res, next) => {
   const { _id } = req.user;
   const { subscription } = req.body;
   const result = await serviceAuth.update(_id, subscription);
-  res
-    .status(200)
-    .json({ message: "Subscription was updated", user: { result } });
+  res.status(200).json({ message: "Subscription was updated", user: { result } });
 };
 
 const updateAvatar = async (req, res, next) => {
@@ -48,6 +47,19 @@ const updateAvatar = async (req, res, next) => {
   res.status(200).json({ message: "Avatar was updated", avatarURL });
 };
 
+const verify = async (req, res, next) => {
+  const { verificationToken } = req.params;
+  await serviceAuth.verifyEmail(verificationToken);
+  res.status(200).json({ message: "Verification successful" });
+};
+
+const resendVerify = async (req, res, next) => {
+  const { email } = req.body;
+  if (!email) throw new ValidationError("Missing required field email");
+  await serviceAuth.resendVerifyEmail(email);
+  res.status(200).json({ message: "Verification email sent" });
+};
+
 module.exports = {
   registration,
   login,
@@ -55,4 +67,6 @@ module.exports = {
   current,
   updateSubscription,
   updateAvatar,
+  verify,
+  resendVerify,
 };

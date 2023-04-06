@@ -15,6 +15,10 @@ const authMiddleware = async (req, res, next) => {
         if (!user || !user.token || user.token !== token) {
           next(new UnauthorizedError("Invalid token"));
         }
+        
+        if (user.verify === false) {
+        next(new UnauthorizedError("Please verify your email"));
+        }
 
         req.user = user;
         next();
